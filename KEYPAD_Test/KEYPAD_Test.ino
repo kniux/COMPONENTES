@@ -1,16 +1,5 @@
-/*  ___   ___  ___  _   _  ___   ___   ____ ___  ____  
- * / _ \ /___)/ _ \| | | |/ _ \ / _ \ / ___) _ \|    \ 
- *| |_| |___ | |_| | |_| | |_| | |_| ( (__| |_| | | | |
- * \___/(___/ \___/ \__  |\___/ \___(_)____)___/|_|_|_|
- *                  (____/ 
- *One of the most useful applications of a keypad is to 
- *use it for keyed entry. You can set up a password and 
- *have the Arduino activate a relay or some other module 
- *if the password is correct.
- * Tutorial URL http://osoyoo.com/2017/09/13/arduino-lesson-4x4-matrix-keypad/
- * CopyRight www.osoyoo.com
- */
- #include <Wire.h> 
+
+#include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Keypad.h>
 
@@ -34,30 +23,33 @@ char hexaKeys[ROWS][COLS] = {
   {'*', '0', '#', 'D'}
 };
 
-byte rowPins[ROWS] = {30,32,34,36}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {31,33,35,37}; //connect to the column pinouts of the keypad
+byte rowPins[ROWS] = {33,35,37,39}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {41,43,45,47}; //connect to the column pinouts of the keypad
 
 Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);  
+LiquidCrystal_I2C lcd(0x27, 20, 4);  
 
 void setup(){
+  Serial.begin(9600);
   lcd.init(); 
   lcd.backlight();
   pinMode(signalPin, OUTPUT);
-  digitalWrite(signalPin, HIGH); 
+  digitalWrite(signalPin, LOW); 
+ Serial.println("Enter Password:");
 }
 
 void loop(){
 
   lcd.setCursor(0,0);
   lcd.print("Enter Password:");
-
+ 
   customKey = customKeypad.getKey();
   if (customKey){
     Data[data_count] = customKey; 
     lcd.setCursor(data_count,1); 
     lcd.print(Data[data_count]); 
+    Serial.print(Data[data_count]);    
     data_count++; 
     }
 
@@ -65,16 +57,19 @@ void loop(){
     lcd.clear();
 
     if(!strcmp(Data, Master)){
-      lcd.print("Correct");
-      digitalWrite(signalPin, LOW); 
+      lcd.setCursor(2,1);
+      lcd.print("Correct  ");
+      Serial.println("Correct");    
+      digitalWrite(signalPin, HIGH); 
       delay(5000);
-      digitalWrite(signalPin, HIGH);
+      digitalWrite(signalPin, LOW );
       }
     else{
+      lcd.setCursor(2,1);
       lcd.print("Incorrect");
+     Serial.println("Incorrect");    
       delay(1000);
-      }
-    
+      }    
     lcd.clear();
     clearData();  
   }
